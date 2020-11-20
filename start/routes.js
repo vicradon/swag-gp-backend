@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 
 /*
 |--------------------------------------------------------------------------
@@ -14,15 +14,16 @@
 */
 
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
-const Route = use('Route')
+const Route = use("Route");
 
-Route
-  .post('register', 'UserController.register')
-  .middleware('guest')
+Route.post("register", "UserController.register").middleware("guest");
 
-Route
-  .post('login', 'UserController.login')
-  .middleware('guest')
+Route.post("login", "UserController.login").middleware("guest");
 
+Route.resource("courses", "CourseController").apiOnly().middleware(["auth"]);
 
-Route.resource('courses', 'CourseController')//.middleware(['auth'])
+Route.get("cumulative", "CumulativeController.index")
+  .middleware(["auth"]);
+
+Route.patch("cumulative", "CumulativeController.update")
+  .middleware(["auth"]);

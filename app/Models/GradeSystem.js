@@ -3,7 +3,7 @@
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use("Model");
 
-class Level extends Model {
+class GradeSystem extends Model {
   static get createdAtColumn() {
     return null;
   }
@@ -12,4 +12,4 @@ class Level extends Model {
   }
 }
 
-module.exports = Level;
+module.exports = GradeSystem;

@@ -1,10 +1,12 @@
 "use strict";
 const User = use("App/Models/User");
+const Preference = use("App/Models/Preference");
+const GradeSystem = use("App/Models/GradeSystem");
 
 class UserController {
-  async register({ request, response }) {
+  async register({ auth, request, response }) {
     try {
-      const { username, email, password } = request.all();
+      const { username, email, password, grade_system } = request.all();
       const errors = [];
       if (!username) {
         errors.push("Missing username");
@@ -14,6 +16,9 @@ class UserController {
       }
       if (!password) {
         errors.push("Missing password");
+      }
+      if (!grade_system) {
+        errors.push("Missing grade system");
       }
       if (errors.length) {
         return response
@@ -27,8 +32,17 @@ class UserController {
       user.email = email;
       user.password = password;
 
-      await user.save();
-      await auth.attempt(email, password);
+      const gradeSystemInstance = await GradeSystem.findBy(
+        "point",
+        grade_system
+      );
+      const preference = new Preference();
+
+      await preference.gradeSystem().associate(gradeSystemInstance);
+      await preference.user().associate(user);
+
+      const authedUser = await auth.withRefreshToken().attempt(email, password);
+      return response.status(201).send(authedUser);
     } catch (error) {
       console.log(error);
       return response.status(500).send(error.message);
@@ -39,12 +53,12 @@ class UserController {
     try {
       // const { email, password } = JSON.parse(request.all().body);
       const { email, password } = request.all();
-      const a = await auth.withRefreshToken().attempt(email, password);
+      const authedUser = await auth.withRefreshToken().attempt(email, password);
 
-      return a;
+      return response.status(200).send(authedUser);
     } catch (error) {
-      console.log(error.message)
-      return response.status(404).send(error.message.split(':')[0]);
+      console.log(error.message);
+      return response.status(404).send(error.message.split(":")[0]);
     }
   }
 
