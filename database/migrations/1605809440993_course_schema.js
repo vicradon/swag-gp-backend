@@ -11,7 +11,10 @@ class CourseSchema extends Schema {
       table.string('title').notNullable()
       table.enu('grade', ['A', 'B', 'C', 'D', 'F']).notNullable()
       table.integer('credit_load').unsigned().notNullable()
-      table.integer('semester').unsigned().references('id').inTable('semesters')
+
+      table.integer('semester_id').unsigned().nullable().references('id').inTable('semesters').onUpdate('CASCADE').onDelete('CASCADE')
+      table.integer('level_id').unsigned().nullable().references('id').inTable('levels').onUpdate('CASCADE').onDelete('CASCADE')
+      table.integer('user_id').unsigned().nullable().references('id').inTable('users').onUpdate('CASCADE').onDelete('CASCADE')
     })
   }
 
