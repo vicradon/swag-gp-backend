@@ -40,9 +40,9 @@ class User extends Model {
   cumulative() {
     return this.hasOne("App/Models/Cumulative");
   }
-  // preferences() {
-  //   return this.hasMany("App/Models/User");
-  // }
+  preferences() {
+    return this.hasOne("App/Models/Preference");
+  }
 }
 
 module.exports = User;

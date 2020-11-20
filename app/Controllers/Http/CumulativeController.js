@@ -4,7 +4,7 @@
 
 const Cumulative = use("App/Models/Cumulative");
 const Course = use("App/Models/Course");
-const GradeSystem = use("App/Models/GradeSystem");
+const Preference = use("App/Models/Preference");
 
 class CumulativeController {
   /**
@@ -18,13 +18,8 @@ class CumulativeController {
   async index({ auth, response }) {
     try {
       const user = await auth.user;
-      const cumulative = await Cumulative.findOrCreate(
-        { user_id: user.id },
-        { units: 0, grade_points: 0, grade_point_average: 0 }
-      );
-      if (!cumulative.user_id) {
-        user.cumulative().save(cumulative);
-      }
+      const cumulative = await Cumulative.findBy("user_id", user.id);
+
       return response.status(200).send(cumulative);
     } catch (error) {
       return response.status(500).send(error);
@@ -43,38 +38,32 @@ class CumulativeController {
     try {
       const user = await auth.user;
 
-      user.gradeSystem().save()
+      const cumulative = await Cumulative.findBy("user_id", user.id);
 
-      const cumulative = await Cumulative.findOrCreate(
-        { user_id: user.id },
-        { units: 0, grade_points: 0, grade_point_average: 0 }
-      );
-
-      const courses = await Course.query().where("user_id", user.id).fetch();
-      const grade_system = await GradeSystem.findBy('user_id')
+      const raw_courses = await Course.query()
+        .where("user_id", user.id)
+        .fetch();
+      const courses = JSON.parse(JSON.stringify(raw_courses));
+      const preference = await Preference.findBy("user_id", user.id);
+      const grade_system = await preference.gradeSystem().fetch();
 
       const total_credit_load = courses.reduce((accumulator, course) => {
-        return accumulator + course.credit_load
-      })
+        return accumulator + course.credit_load;
+      }, 0);
       const total_grade_point = courses.reduce((accumulator, course) => {
-        return accumulator + course.credit_load
-      })
+        return accumulator + course.credit_load * grade_system[course.grade];
+      }, 0);
 
-      // cumulative.units = request.body.units || cumulative.units;
-      // cumulative.grade_points =
-      //   request.body.grade_points || cumulative.grade_points;
-      // cumulative.grade_point_average =
-      //   request.body.grade_point_average || cumulative.grade_point_average;
 
-      // if (!cumulative.user_id) {
-      //   user.cumulative().save(cumulative);
-      // }
+      cumulative.credit_load = total_credit_load;
+      cumulative.grade_point = total_grade_point;
+      cumulative.grade_point_average = (total_grade_point / total_credit_load).toFixed(2);
 
-      // cumulative.save();
+      await cumulative.save();
 
-      return response.status(200).send(courses);
+      return response.status(200).send(cumulative);
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return response.status(500).send(error);
     }
   }

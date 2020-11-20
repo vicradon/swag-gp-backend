@@ -4,6 +4,9 @@
 const Model = use("Model");
 
 class Cumulative extends Model {
+    user(){
+        return this.hasOne('App/Models/User')
+    }
 }
 
 module.exports = Cumulative;

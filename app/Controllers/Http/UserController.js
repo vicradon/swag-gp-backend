@@ -1,16 +1,16 @@
 "use strict";
+
 const User = use("App/Models/User");
 const Preference = use("App/Models/Preference");
 const GradeSystem = use("App/Models/GradeSystem");
+const Cumulative = use("App/Models/Cumulative");
 
 class UserController {
   async register({ auth, request, response }) {
     try {
       const { username, email, password, grade_system } = request.all();
       const errors = [];
-      if (!username) {
-        errors.push("Missing username");
-      }
+
       if (!email) {
         errors.push("Missing email");
       }
@@ -28,7 +28,6 @@ class UserController {
 
       const user = new User();
 
-      user.username = username;
       user.email = email;
       user.password = password;
 
@@ -37,9 +36,14 @@ class UserController {
         grade_system
       );
       const preference = new Preference();
+      const cumulative = new Cumulative();
+      cumulative.credit_load = 0;
+      cumulative.grade_point = 0;
+      cumulative.grade_point_average = 0;
 
       await preference.gradeSystem().associate(gradeSystemInstance);
-      await preference.user().associate(user);
+      await user.preference().save(preference);
+      await user.cumulative().save(cumulative);
 
       const authedUser = await auth.withRefreshToken().attempt(email, password);
       return response.status(201).send(authedUser);
