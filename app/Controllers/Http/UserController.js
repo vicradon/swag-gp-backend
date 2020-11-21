@@ -4,26 +4,23 @@ const User = use("App/Models/User");
 const Preference = use("App/Models/Preference");
 const GradeSystem = use("App/Models/GradeSystem");
 const Cumulative = use("App/Models/Cumulative");
+const { validateAll } = use("Validator");
 
 class UserController {
   async register({ auth, request, response }) {
     try {
-      const { username, email, password, grade_system } = request.all();
-      const errors = [];
+      const { email, password, grade_system } = request.all();
 
-      if (!email) {
-        errors.push("Missing email");
-      }
-      if (!password) {
-        errors.push("Missing password");
-      }
-      if (!grade_system) {
-        errors.push("Missing grade system");
-      }
-      if (errors.length) {
-        return response
-          .status(400)
-          .send(`Invalid request. ${errors.join(" ")}`);
+      const rules = {
+        email: "required|email|unique:users,email",
+        password: "required",
+        grade_system: "in:4,5",
+      };
+
+      const validation = await validateAll(request.all(), rules);
+
+      if (validation.fails()) {
+        return response.status(400).send(validation.messages());
       }
 
       const user = new User();
@@ -57,26 +54,47 @@ class UserController {
     try {
       // const { email, password } = JSON.parse(request.all().body);
       const { email, password } = request.all();
+      const rules = {
+        email: "required|email",
+        password: "required",
+      };
+
+      const validation = await validateAll(request.all(), rules);
+
+      if (validation.fails()) {
+        return response.status(400).send(validation.messages());
+      }
+
       const authedUser = await auth.withRefreshToken().attempt(email, password);
 
       return response.status(200).send(authedUser);
     } catch (error) {
-      console.log(error.message);
-      return response.status(404).send(error.message.split(":")[0]);
+      return response.status(404).send(error);
     }
   }
 
-  async logout({ auth }) {
-    await auth.logout();
+  async update({auth, request, response}) {
+    try {
+      const { email, firstName, lastName } = request.all();
+      const rules = {
+        email: "required|email|unique:users,email",
+      };
+      const validation = await validateAll(request.all(), rules);
 
-    return "Logged out successfully";
-  }
+      if (validation.fails()) {
+        return response.status(400).send(validation.messages());
+      }
 
-  show({ auth, params }) {
-    if (auth.user.id !== Number(params.id)) {
-      return "You cannot see someone else's profile";
+      const user = await auth.user;
+      user.email = email;
+      user.firstName = firstName || user.firstName;
+      user.lastName = lastName || user.lastName;
+
+      const updatedUser = await user.save();
+      return response.status(200).send(updatedUser);
+    } catch (error) {
+      return response.status(500).send(error);
     }
-    return auth.user;
   }
 }
 

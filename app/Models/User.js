@@ -40,7 +40,7 @@ class User extends Model {
   cumulative() {
     return this.hasOne("App/Models/Cumulative");
   }
-  preferences() {
+  preference() {
     return this.hasOne("App/Models/Preference");
   }
 }
