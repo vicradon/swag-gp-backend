@@ -16,14 +16,13 @@
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use("Route");
 
-Route.post("register", "UserController.register").middleware("guest");
-Route.post("login", "UserController.login").middleware("guest");
-Route.patch('/users/:id', 'UserController.update').middleware(["auth"]);
+Route.group(() => {
+  Route.post("register", "UserController.register").middleware("guest");
+  Route.post("login", "UserController.login").middleware("guest");
+  Route.patch("/users/:id", "UserController.update").middleware(["auth"]);
 
+  Route.resource("courses", "CourseController").apiOnly().middleware(["auth"]);
 
-Route.resource("courses", "CourseController").apiOnly().middleware(["auth"]);
-
-Route.get("cumulative", "CumulativeController.index")
-  .middleware(["auth"]);
-Route.patch("cumulative", "CumulativeController.update")
-  .middleware(["auth"]);
+  Route.get("cumulative", "CumulativeController.index").middleware(["auth"]);
+  Route.patch("cumulative", "CumulativeController.update").middleware(["auth"]);
+}).prefix("api/v1");

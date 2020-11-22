@@ -1,23 +1,9 @@
 "use strict";
 
-/** @typedef {import('@adonisjs/framework/src/Request')} Request */
-/** @typedef {import('@adonisjs/framework/src/Response')} Response */
-
 const Course = use("App/Models/Course");
 const { validateAll } = use("Validator");
 
-/**
- * Resourceful controller for interacting with courses
- */
 class CourseController {
-  /**
-   * Show a list of all courses.
-   * GET courses
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
   async index({ auth, request, response }) {
     try {
       const { semester, level } = request.all();
@@ -60,14 +46,6 @@ class CourseController {
     }
   }
 
-  /**
-   * Create/save a new course.
-   * POST courses
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
   async store({ auth, request, response }) {
     try {
       const {
@@ -113,13 +91,6 @@ class CourseController {
     }
   }
 
-  /**
-   * Display a single course.
-   * GET courses/:id
-   *
-   * @param {object} ctx
-   * @param {Response} ctx.response
-   */
   async show({ auth, params, response }) {
     try {
       const course = await Course.find(params.id);
@@ -141,14 +112,6 @@ class CourseController {
     }
   }
 
-  /**
-   * Update course details.
-   * PUT or PATCH courses/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
   async update({ params, request, response }) {
     try {
       const {
@@ -196,14 +159,6 @@ class CourseController {
     }
   }
 
-  /**
-   * Delete a course with id.
-   * DELETE courses/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
   async destroy({ params, response }) {
     try {
       const course = await Course.find(params.id);
