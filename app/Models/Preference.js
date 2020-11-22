@@ -4,6 +4,9 @@
 const Model = use("Model");
 
 class Preference extends Model {
+  static get hidden() {
+    return ["created_at", "updated_at"];
+  }
   gradeSystem() {
     return this.belongsTo("App/Models/GradeSystem");
   }

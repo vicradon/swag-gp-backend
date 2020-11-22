@@ -19,6 +19,7 @@ const Route = use("Route");
 Route.group(() => {
   Route.post("register", "UserController.register").middleware("guest");
   Route.post("login", "UserController.login").middleware("guest");
+  Route.get("/users/:id", "UserController.show").middleware(["auth"]);
   Route.patch("/users/:id", "UserController.update").middleware(["auth"]);
 
   Route.resource("courses", "CourseController").apiOnly().middleware(["auth"]);

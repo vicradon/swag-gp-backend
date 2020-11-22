@@ -4,9 +4,12 @@
 const Model = use("Model");
 
 class Cumulative extends Model {
-    user(){
-        return this.hasOne('App/Models/User')
-    }
+  static get hidden() {
+    return ["created_at", "updated_at", "user_id", "id"];
+  }
+  user() {
+    return this.hasOne("App/Models/User");
+  }
 }
 
 module.exports = Cumulative;

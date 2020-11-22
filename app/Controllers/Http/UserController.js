@@ -73,7 +73,16 @@ class UserController {
     }
   }
 
-  async update({auth, request, response}) {
+  async show({ auth, response }) {
+    try {
+      const user = await auth.user;
+      return response.status(200).send(user);
+    } catch (error) {
+      return response.status(500).send(error);
+    }
+  }
+
+  async update({ auth, request, response }) {
     try {
       const { email, firstName, lastName } = request.all();
       const rules = {
