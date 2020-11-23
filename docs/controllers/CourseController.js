@@ -41,6 +41,7 @@ class CourseController {
                       "level": "200"
                   }
               ]
+   *
    *       404:
    *        description: No course found
    *        example:
@@ -85,7 +86,7 @@ class CourseController {
    *       201:
    *         description: Creates a course
    *         example:
-                  {
+   *              {
                       "id": 6,
                       "title": "COurse",
                       "code": "course 101",

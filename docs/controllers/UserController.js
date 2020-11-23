@@ -66,14 +66,14 @@ class UserController {
 
   /**
    * @swagger
-   * /api/v1/users/:id:
+   * /api/v1/users/profile:
    *   get:
    *     tags:
    *       - User
-   *     summary: Returns a user email, first and last name
+   *     summary: Returns a user's profile (email, first and last name)
    *     responses:
    *       200:
-   *         description: Returns a user email, first and last name
+   *         description: Returns a user's profile (email, first and last name)
    *         example:
    *            {
                     "firstName": null,
@@ -85,26 +85,21 @@ class UserController {
 
   /**
    * @swagger
-   * /api/v1/users/:id:
+   * /api/v1/users/profile:
    *   patch:
    *     tags:
    *       - User
-   *     summary: Returns the user's updated details
+   *     summary: Updates a user's basic profile
    *     parameters:
-   *       - name: email
-   *         description: User's email
-   *         in: body
-   *         required: true
-   *         type: string
    *       - name: firstName
    *         description: User's firstName
    *         in: body
-   *         required: false
+   *         required: true
    *         type: string
    *       - name: lastName
    *         description: User's lastName
    *         in: body
-   *         required: false
+   *         required: true
    *         type: string
    *     responses:
    *       200:
@@ -116,5 +111,60 @@ class UserController {
                     "email": "test30.dev@gmail.com"
                 }
    */
-  async update({ auth, request, response }) {}
+  async updateProfile({ auth, request, response }) {}
+
+  /**
+   * @swagger
+   * /api/v1/users/email:
+   *   patch:
+   *     tags:
+   *       - User
+   *     summary: Updates a user's email address
+   *     parameters:
+   *       - name: email
+   *         description: User's email
+   *         in: body
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: Returns the user's profile
+   *         example:
+   *            {
+                    "firstName": some,
+                    "lastName":  name,
+                    "email": "test30.dev@gmail.com"
+                }
+   */
+  async updateEmail({ auth, request, response }) {}
+
+  /**
+   * @swagger
+   * /api/v1/users/password:
+   *   patch:
+   *     tags:
+   *       - User
+   *     summary: Updates a user's password
+   *     parameters:
+   *       - name: currentPassword
+   *         description: User's current password
+   *         in: body
+   *         required: true
+   *         type: string
+   *       - name: newPassword
+   *         description: User's new password
+   *         in: body
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: Returns the user's profile
+   *         example:
+   *            {
+                    "firstName": some,
+                    "lastName":  name,
+                    "email": "test30.dev@gmail.com"
+                }
+   */
+  async updatePassword({ auth, request, response }) {}
 }
