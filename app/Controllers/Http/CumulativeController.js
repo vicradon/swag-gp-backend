@@ -57,7 +57,7 @@ class CumulativeController {
 
       cumulative.credit_load = total_credit_load;
       cumulative.grade_point = total_grade_point;
-      cumulative.grade_point_average = (total_grade_point / total_credit_load).toFixed(2);
+      cumulative.grade_point_average = Number((total_grade_point / total_credit_load).toFixed(2));
 
       await cumulative.save();
 

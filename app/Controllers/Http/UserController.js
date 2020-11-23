@@ -1,5 +1,7 @@
 "use strict";
 
+const Hash = use("Hash");
+
 const User = use("App/Models/User");
 const Preference = use("App/Models/Preference");
 const GradeSystem = use("App/Models/GradeSystem");
@@ -23,21 +25,21 @@ class UserController {
         return response.status(400).send(validation.messages());
       }
 
-      const user = new User();
-
-      user.email = email;
-      user.password = password;
+      const user = await User.create({
+        email,
+        password,
+      });
 
       const gradeSystemInstance = await GradeSystem.findBy(
         "point",
-        grade_system
+        grade_system | "5"
       );
       const preference = new Preference();
-      const cumulative = new Cumulative();
-      cumulative.credit_load = 0;
-      cumulative.grade_point = 0;
-      cumulative.grade_point_average = 0;
-
+      const cumulative = await Cumulative.create({
+        credit_load: 0,
+        grade_point: 0,
+        grade_point_average: 0,
+      });
       await preference.gradeSystem().associate(gradeSystemInstance);
       await user.preference().save(preference);
       await user.cumulative().save(cumulative);
@@ -82,9 +84,33 @@ class UserController {
     }
   }
 
-  async update({ auth, request, response }) {
+  async updateProfile({ auth, request, response }) {
     try {
-      const { email, firstName, lastName } = request.all();
+      const { firstName, lastName } = request.all();
+      const rules = {
+        firstName: "required",
+        lastName: "required",
+      };
+      const validation = await validateAll(request.all(), rules);
+
+      if (validation.fails()) {
+        return response.status(400).send(validation.messages());
+      }
+
+      const user = await auth.user;
+      user.firstName = firstName;
+      user.lastName = lastName;
+
+      await user.save();
+      return response.status(200).send(user);
+    } catch (error) {
+      return response.status(500).send(error);
+    }
+  }
+
+  async updateEmail({ auth, request, response }) {
+    try {
+      const { email } = request.all();
       const rules = {
         email: "required|email|unique:users,email",
       };
@@ -96,11 +122,38 @@ class UserController {
 
       const user = await auth.user;
       user.email = email;
-      user.firstName = firstName || user.firstName;
-      user.lastName = lastName || user.lastName;
 
-      const updatedUser = await user.save();
-      return response.status(200).send(updatedUser);
+      await user.save();
+      return response.status(200).send(user);
+    } catch (error) {
+      return response.status(500).send(error);
+    }
+  }
+
+  async updatePassword({ auth, request, response }) {
+    try {
+      const { currentPassword, newPassword } = request.all();
+      const rules = {
+        currentPassword: "required",
+        newPassword: "required",
+      };
+      const validation = await validateAll(request.all(), rules);
+
+      if (validation.fails()) {
+        return response.status(400).send(validation.messages());
+      }
+
+      const user = await auth.user;
+      const passwordsMatch = await Hash.verify(currentPassword, user.password)
+
+      if (!passwordsMatch) {
+        return response.status(400).send("Supplied password is wrong");
+      }
+
+      user.password = newPassword;
+
+      await user.save();
+      return response.status(200).send(user);
     } catch (error) {
       return response.status(500).send(error);
     }

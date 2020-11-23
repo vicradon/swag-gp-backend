@@ -72,14 +72,14 @@ class CourseController {
         return response.status(400).send(validation.messages());
       }
 
-      const course = new Course();
-
-      course.title = title;
-      course.grade = grade;
-      course.code = code;
-      course.credit_load = credit_load;
-      course.semester = semester;
-      course.level = level;
+      const course = Course.create({
+        title,
+        grade,
+        code,
+        credit_load,
+        semester,
+        level
+      });
 
       const user = await auth.getUser();
       await user.courses().save(course);
