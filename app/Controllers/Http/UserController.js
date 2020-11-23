@@ -54,7 +54,6 @@ class UserController {
 
   async login({ auth, request, response }) {
     try {
-      // const { email, password } = JSON.parse(request.all().body);
       const { email, password } = request.all();
       const rules = {
         email: "required|email",
