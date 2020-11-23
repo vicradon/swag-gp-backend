@@ -18,7 +18,7 @@ module.exports = {
   | interacting with SQL databases.
   |
   */
-  connection: Env.get("DB_CONNECTION", mysql),
+  connection: Env.get("DB_CONNECTION", "mysql"),
 
   /*
   |--------------------------------------------------------------------------
