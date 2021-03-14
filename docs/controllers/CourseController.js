@@ -184,4 +184,43 @@ class CourseController {
    *            course deleted successfully
    */
   async destroy({ params, response }) {}
+
+  /**
+   * @swagger
+   * /api/v1/cumulative:
+   *   get:
+   *     tags:
+   *       - Courses
+   *     summary: Returns the semester and overall cumulative
+   *     parameters:
+   *       - name: semester
+   *         description: Desired semester 
+   *         in: query
+   *         required: true
+   *         type: strinumberng
+   *       - name: level
+   *         description: Desired level
+   *         in: query
+   *         required: true
+   *         type: number
+   *     responses:
+   *       200:
+   *         description: returned cumulative objects
+   *         example:
+   *            {
+                    "semester_cumulative": {
+                        "credit_load": 13,
+                        "grade_point": 65,
+                        "grade_point_average": 5,
+                        "course_count": 4
+                    },
+                    "cumulative": {
+                        "credit_load": 88,
+                        "grade_point": 365,
+                        "grade_point_average": 4.15
+                    }
+                }
+   * 
+   */
+  async fetchCumulative({ request, auth, response }) {}
 }

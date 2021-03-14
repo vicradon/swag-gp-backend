@@ -45,9 +45,13 @@ class UserController {
       await user.cumulative().save(cumulative);
 
       const authedUser = await auth.withRefreshToken().attempt(email, password);
-      return response.status(201).send(authedUser);
+      return response.status(201).send({
+        ...authedUser,
+        success: true,
+        message: "user registered successfully",
+      });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       return response.status(500).send(error.message);
     }
   }
@@ -70,40 +74,85 @@ class UserController {
 
       return response.status(200).send(authedUser);
     } catch (error) {
-      return response.status(404).send(error);
+      if (error.message.includes("E_USER_NOT_FOUND")) {
+        return response.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+      return response.status(404).send(error.message);
     }
   }
 
-  async show({ auth, response }) {
+  async show({ auth, params, response }) {
     try {
       const user = await auth.user;
-      return response.status(200).send(user);
+
+      if (user.isAdmin) {
+        const rules = {
+          id: "required",
+        };
+
+        const validation = await validateAll(request.all(), rules);
+
+        if (validation.fails()) {
+          return response.badRequest({
+            success: false,
+            message: "id parameter was not supplied",
+            validation_message: validation.messages(),
+          });
+        }
+
+        const requestedUser = await User.find(params.id);
+        return response.ok({
+          sucess: true,
+          message: "fetched user successfully",
+          requestedUser,
+        });
+      }
+      return response.unauthorized({
+        success: false,
+        message: "You are not authorized to view another user's details",
+      });
     } catch (error) {
       return response.status(500).send(error);
+    }
+  }
+
+  async fetchProfileDetails({ auth, response }) {
+    try {
+      const user = await auth.user;
+      return response.ok({
+        success: true,
+        message: "successfully  fetched profile details",
+        user,
+      });
+    } catch (error) {
+      return response.internalServerError(error.message);
     }
   }
 
   async updateProfile({ auth, request, response }) {
     try {
-      const { firstName, lastName } = request.all();
-      const rules = {
-        firstName: "required",
-        lastName: "required",
-      };
-      const validation = await validateAll(request.all(), rules);
-
-      if (validation.fails()) {
-        return response.status(400).send(validation.messages());
-      }
+      const { firstName, lastName, department, school } = request.all();
 
       const user = await auth.user;
       user.firstName = firstName;
       user.lastName = lastName;
+      user.department = department;
+      user.school = school;
 
       await user.save();
-      return response.status(200).send(user);
+      return response.ok({
+        success: true,
+        message: "updated user profile",
+        user,
+      });
     } catch (error) {
-      return response.status(500).send(error);
+      return response.internalServerError({
+        success: false,
+        message: error.message,
+      });
     }
   }
 
@@ -143,7 +192,7 @@ class UserController {
       }
 
       const user = await auth.user;
-      const passwordsMatch = await Hash.verify(currentPassword, user.password)
+      const passwordsMatch = await Hash.verify(currentPassword, user.password);
 
       if (!passwordsMatch) {
         return response.status(400).send("Supplied password is wrong");
