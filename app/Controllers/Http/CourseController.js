@@ -111,14 +111,6 @@ class CourseController {
     }
   }
 
-  async isOwner({ auth, course }) {
-    const courseOwner = await course.user().fetch();
-    const requester = await auth.user;
-    if (requester.id !== courseOwner.id) {
-      return response.status(404).send("You cannot view another user's course");
-    }
-  }
-
   async update({ auth, params, request, response }) {
     try {
       const {
@@ -183,16 +175,37 @@ class CourseController {
     }
   }
 
-  async destroy({ params, response }) {
+  async destroy({ auth, params, response }) {
     try {
       const course = await Course.find(params.id);
       if (!course) {
         return response.status(404).send("Course not found");
       }
+      const user = await auth.user;
+
+      if (course.user_id !== user.id) {
+        return response.unauthorized({
+          success: false,
+          message: "You cannot delete another user's course",
+        });
+      }
+
       await course.delete();
-      return response.send("course deleted successfully");
+      const cumulative = await this.computeCumulative({
+        user,
+        semester: course.semester,
+        level: course.level,
+      });
+      return response.ok({
+        success: true,
+        message: "course deleted successfully",
+        ...cumulative,
+      });
     } catch (error) {
-      return response.status(500).send("An error occured");
+      return response.internalServerError({
+        success: false,
+        message: "An error occured",
+      });
     }
   }
 
