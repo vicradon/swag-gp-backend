@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node server.js",
     "test": "node ace test",
-    "migrate": "npx adonis migration:run"
+    "migrate": "ENV_SILENT=true npx adonis migration:run"
   },
   "keywords": [
     "adonisjs",
