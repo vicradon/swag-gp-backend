@@ -247,19 +247,25 @@ class CourseController {
 
       cumulative.credit_load = total_credit_load;
       cumulative.grade_point = total_grade_point;
-      cumulative.grade_point_average = Number(
+      const cgpa_computation = Number(
         (total_grade_point / total_credit_load).toFixed(2)
       );
+      cumulative.grade_point_average = isNaN(cgpa_computation)
+        ? 0
+        : cgpa_computation;
 
       await cumulative.save();
+
+      const sgpa_computation = Number(
+        (semester_grade_point / semester_credit_load).toFixed(2)
+      );
+      const sgpa = isNaN(sgpa_computation) ? 0 : sgpa_computation;
 
       return {
         semester_cumulative: {
           credit_load: semester_credit_load,
           grade_point: semester_grade_point,
-          grade_point_average: Number(
-            (semester_grade_point / semester_credit_load).toFixed(2)
-          ),
+          grade_point_average: sgpa,
           course_count: semester_courses.length,
         },
         cumulative,

@@ -11,18 +11,24 @@ const { validateAll } = use("Validator");
 class UserController {
   async register({ auth, request, response }) {
     try {
-      const { email, password, grade_system } = request.all();
+      const { email, password, grade_system, duration } = request.all();
 
       const rules = {
         email: "required|email|unique:users,email",
         password: "required",
-        grade_system: "in:4,5",
+        grade_system: "required|in:4,5",
+        duration: "required|in:2,3,4,5,6,7,8,9",
       };
 
-      const validation = await validateAll(request.all(), rules);
+      const validation = await validateAll(request.all(), rules, {
+        "email.unique": "Email is already in use",
+      });
 
       if (validation.fails()) {
-        return response.status(400).send(validation.messages());
+        return response.badRequest({
+          success: false,
+          message: validation.messages(),
+        });
       }
 
       const user = await User.create({
@@ -40,6 +46,7 @@ class UserController {
         grade_point: 0,
         grade_point_average: 0,
       });
+      preference.duration = duration;
       await preference.gradeSystem().associate(gradeSystemInstance);
       await user.preference().save(preference);
       await user.cumulative().save(cumulative);
@@ -122,10 +129,13 @@ class UserController {
   async fetchProfileDetails({ auth, response }) {
     try {
       const user = await auth.user;
+      const preferences = await user.preference().fetch();
+
       return response.ok({
         success: true,
         message: "successfully  fetched profile details",
         user,
+        duration: preferences.duration,
       });
     } catch (error) {
       return response.internalServerError(error.message);
