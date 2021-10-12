@@ -19,7 +19,7 @@ module.exports = {
   origin:
     process.env.NODE_ENV === "development"
       ? ["http://localhost:3000", "http://localhost:3242"]
-      : ["https://swag-gp.netlify.app"],
+      : ["https://swag-gp.netlify.app", "http://localhost:3000"],
 
   /*
   |--------------------------------------------------------------------------
